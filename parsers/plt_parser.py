@@ -26,6 +26,28 @@ class PltParser(object):
             values_list.append(value)
             index += 1
 
+    def get_data_set(self, data_set_name):
+        """
+        Gets the values of the given data sets
+        :param data_set_name: The name of the data set to look for
+        :return: A list of the data set values
+        """
+        return self._data_sets[data_set_name]
+
+    def export_to_csv(self, csv_path, data_sets=None):
+        """
+        Writes te plt to a csv format
+        :param csv_path: A path to write the csv file
+        :param data_sets: The data sets to export, if not given, export all data sets
+        """
+        if not data_sets:
+            data_sets = self._data_sets.keys()
+        with open(csv_path, "wb") as csv_file:
+            for data_set in data_sets:
+                data = ",".join([data_set] + self._data_sets[data_set]) + "\n"
+                csv_file.write(data)
+
+
 
 if __name__ == "__main__":
     p = PltParser(r"C:\Users\Moran\Documents\transient_MSET_inst_MSET_1_to_2_des.plt")
