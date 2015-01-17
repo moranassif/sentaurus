@@ -2,6 +2,24 @@ __author__ = 'Moran'
 import re
 
 
+def find_index_of_closets_value(values, value_to_look_for):
+    """
+    Finds the index of the value which is closest to the value given
+    :param values: A list of values to look into
+    :param value_to_look_for: The value to look for
+    :return: Index inside the list
+    """
+    closest_index = 0
+    # Init to some value
+    closest_distance = max(abs(value_to_look_for), abs(values[0]))
+    for index, value in enumerate(values):
+        distance = abs(value - value_to_look_for)
+        if distance < closest_distance:
+            closest_index = index
+            closest_distance = distance
+    return closest_index
+
+
 class PltParser(object):
     """
     A parser for plt files
@@ -23,7 +41,7 @@ class PltParser(object):
         for value in data_list:
             key = sets_list[index % len(sets_list)]
             values_list = self._data_sets.setdefault(key, [])
-            values_list.append(value)
+            values_list.append(float(value))
             index += 1
 
     def get_data_set(self, data_set_name):
@@ -44,10 +62,33 @@ class PltParser(object):
             data_sets = self._data_sets.keys()
         with open(csv_path, "wb") as csv_file:
             for data_set in data_sets:
-                data = ",".join([data_set] + self._data_sets[data_set]) + "\n"
+                data = ",".join([data_set] + [str(x) for x in self._data_sets[data_set]]) + "\n"
                 csv_file.write(data)
 
-
+    def calc_rise_time(self, contact, start_time):
+        """
+        Calculate the rise time of the voltage of the
+        contact from after the given time
+        :param contact: The contact to check
+        :param start_time: The time to start looking for the 10% of the final value
+        :return: Rise time is seconds
+        """
+        # The percentage from and to of the rise time calculations
+        # for example 0.1 of the final value to 0.9 of it
+        from_percent = 0.1
+        to_percent = 0.9
+        times = self.get_data_set("time")
+        assert times[0] <= start_time < times[-1]
+        # The index to start looking from
+        starting_index = find_index_of_closets_value(self.get_data_set("time"), start_time)
+        # Get relevant voltages
+        voltages = self.get_data_set("%s InnerVoltage" % contact)[starting_index:]
+        final_voltage = voltages[-1]
+        from_index = find_index_of_closets_value(voltages, from_percent * final_voltage)
+        to_index = find_index_of_closets_value(voltages[from_index:], to_percent * final_voltage)
+        rise_time = times[starting_index+from_index+to_index] - times[starting_index+from_index]
+        return rise_time
 
 if __name__ == "__main__":
-    p = PltParser(r"C:\Users\Moran\Documents\transient_MSET_inst_MSET_1_to_2_des.plt")
+    p = PltParser(r"D:\Users\Moran\Scratchpad\transitions results\3_to_1\transient_MSET_inst_MSET_3_to_1_des.plt")
+    print p.calc_rise_time("source_con", 1e-11)
