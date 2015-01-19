@@ -21,7 +21,10 @@ class TransitionsHandler(object):
         Export all currents and voltages of the transitions to csv files
         :param directory: The directory to export to
         """
+        if not os.path.exists(directory):
+            os.makedirs(directory)
         contacts = ["source_con", "drain1_con", "drain2_con", "JG1", "JG2"]
         for transition, plt_parser in self._plt_parsers.iteritems():
             file_path = os.path.join(directory, "%s.csv" % transition)
-            plt_parser.export_to_csv(file_path, ["time"] + [x + " InnerVoltage" for x in contacts])
+            plt_parser.export_to_csv(file_path, ["time"] + [x + " InnerVoltage" for x in contacts] +
+                                     [x + " TotalCurrent" for x in contacts])
