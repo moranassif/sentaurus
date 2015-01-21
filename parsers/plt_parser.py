@@ -57,13 +57,22 @@ class PltParser(object):
         Writes te plt to a csv format
         :param csv_path: A path to write the csv file
         :param data_sets: The data sets to export, if not given, export all data sets
+               If a tuple is given, parse it as (operation, data set1, data set2) and
+               print of example data_set1*data_set2
         """
         if not data_sets:
             data_sets = self._data_sets.keys()
         with open(csv_path, "wb") as csv_file:
             for data_set in data_sets:
-                data = ",".join([data_set] + [str(x) for x in self._data_sets[data_set]]) + "\n"
-                csv_file.write(data)
+                if type(data_set) == tuple:
+                    assert len(data_set) == 3
+                    operation = data_set[0]
+                    data1 = self._data_sets[data_set[1]]
+                    data2 = self._data_sets[data_set[2]]
+                    data = ["%s %s %s" % data_set] + [eval("%s %s %s" % (couple[0], operation, couple[1])) for couple in zip(data1, data2)]
+                else:
+                    data = [data_set] + [str(x) for x in self._data_sets[data_set]]
+                csv_file.write(",".join(data) + "\n")
 
     def calc_rise_time(self, contact, start_time):
         """
