@@ -28,4 +28,5 @@ class TransitionsHandler(object):
             file_path = os.path.join(directory, "%s.csv" % transition)
             voltages = [x + " InnerVoltage" for x in contacts]
             currents = [x + " TotalCurrent" for x in contacts]
-            plt_parser.export_to_csv(file_path, ["time"] + voltages + currents)
+            powers = zip(["*"] * len(voltages), voltages, currents)
+            plt_parser.export_to_csv(file_path, ["time"] + voltages + currents + ["time"], powers)
