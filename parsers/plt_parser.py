@@ -99,4 +99,4 @@ class PltParser(object):
 
 if __name__ == "__main__":
     p = PltParser(r"D:\Users\Moran\Scratchpad\transitions results\3_to_1\transient_MSET_inst_MSET_3_to_1_des.plt")
-    print p.calc_rise_time("source_con", 1e-11)
+    print(p.calc_rise_time("source_con", 1e-11))
